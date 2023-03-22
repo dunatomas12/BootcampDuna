@@ -1,4 +1,3 @@
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from .main import app
@@ -6,6 +5,11 @@ from .main import app
 client = TestClient(app)
 
 error404 = str("The kid is not registered in Santa's list :(")
+
+def test_read_main():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Welcome to Santa's List! Add your kids' name, and let Santa know if they should recieve any presents"}
 
 def test_read_kid():
     response = client.get("/kids/Joanet")
@@ -36,7 +40,7 @@ def test_create_existing_kid():
     }
 
 def test_update_kid():
-    response =client.put("/update_kid/Laura", json={"name" : "Laura", "age": 11, "description" : "She helps with house duties, but she doesn't pay attention sometimes", "behaviour" : 7})
+    response =client.put("/update_kid/Laura", json={"name" : "Laura", "age": 11, "description" : "She has made an improvement this weekend", "behaviour" : 8})
     assert response.status_code == 200
     assert response.json() == {
         "name" : "Laura", "age": 11, "description" : "She has made an improvement this weekend", "behaviour" : 8

@@ -1,5 +1,6 @@
 from fastapi import Body, FastAPI, HTTPException
 from pydantic import BaseModel, Field
+from fastapi.encoders import jsonable_encoder
 
 app = FastAPI()
 
@@ -43,20 +44,26 @@ async def read_kid(name: str):
         raise HTTPException(status_code=404, detail=error404)
     return SantaList.get(name) # returns a specific kid in  Santa's List
 
-@app.post("/kids/")
+@app.post("/new_kid/")
 async def create_kid(kid: Kid):
+    if kid.name in SantaList:
+        raise HTTPException(status_code=403, detail="The kid is already in Santa's List")
     SantaList[len(SantaList) + 1] = kid #adds a new kid to Santa's list
     return kid
 
-@app.put("/kids/{name}")
+@app.put("/update_kid/{name}")
 async def update_kid(name: str, kid: Kid):
     if name not in SantaList:
         raise HTTPException(status_code=404, detail=error404)
+    # update_item_encoded = jsonable_encoder(kid)
+    # SantaList[name] = update_item_encoded
+    # return SantaList[name]
     SantaList[name] = kid #updates an existing kid in Santa's List
     return kid
 
-@app.delete("/kids/{name}")
+@app.delete("/delete_kid/{name}")
 async def delete_kid(name: str):
     if name not in SantaList:
         raise HTTPException(status_code=404, detail=error404)
-    return SantaList.pop(name) #deletes an existing kid in Santa's List
+    SantaList.pop(name) #deletes an existing kid in Santa's List
+    return str("The kid has been deleted from Santa's list, he won't get presents anymore")
